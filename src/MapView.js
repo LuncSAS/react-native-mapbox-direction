@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import {StyleSheet, View} from "react-native";
 
-import MapboxGL from "@mapbox/react-native-mapbox-gl";
+// import MapboxGL from "@mapbox/react-native-mapbox-gl";
 import { multiLineString, lineString } from "@turf/helpers";
 import distance from "@turf/distance";
 const turfPoint = require("turf-point");
@@ -98,8 +98,8 @@ class MapView extends Component<MapViewProps> {
       MapboxGL.UserTrackingModes.Follow;
 
     return (
-      <View style={{flex: 1}}>
-        <MapboxGL.MapView
+      <View style={{flex: 1, backgroundColor: 'pink'}}>
+        {/* <MapboxGL.MapView
           styleURL={MapboxGL.StyleURL.Street}
           ref={this.setMapRef}
           logoEnabled={false}
@@ -108,7 +108,7 @@ class MapView extends Component<MapViewProps> {
           showUserLocation
         >
 
-        </MapboxGL.MapView>
+        </MapboxGL.MapView> */}
       </View>
     );
   }
