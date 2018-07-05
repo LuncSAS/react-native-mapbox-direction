@@ -17,6 +17,28 @@ import { MapView } from 'react-native-mapbox-direction';
 
 ...
 
+render() {
+
+    ...
+
+
+    <MapView 
+        mapBoxApiKey={APIKEY}
+        navigationMode="Course"
+        startingPoint={{
+            latitude: 48.857908, 
+            longitude: 2.302661,
+        }}
+        endingPoint={{
+            latitude: 48.858192, 
+            longitude: 2.294981,
+        }}
+        color="green"
+    />
+
+    ...
+
+}
 
 ```
   

@@ -1,15 +1,16 @@
 // @flow
-import React, { Component } from "react";
-import {StyleSheet, View} from "react-native";
+import React, { Component } from 'react';
+import {StyleSheet, View} from 'react-native';
 
-// import MapboxGL from "@mapbox/react-native-mapbox-gl";
-import { multiLineString, lineString } from "@turf/helpers";
-import distance from "@turf/distance";
-const turfPoint = require("turf-point");
+import MapboxGL from '@mapbox/react-native-mapbox-gl';
+import MapboxClient from 'mapbox';
 
-// import Destination from "./Destination";
-// import Route from "./Route";
-// import CirclePicture from "./CirclePicture";
+import { multiLineString, lineString } from '@turf/helpers';
+import distance from '@turf/distance';
+const turfPoint = require('turf-point');
+
+import Destination from "./Destination";
+import Route from "./Route";
 
 type NavigationMode = 'Course' | 'Global';
 
@@ -20,9 +21,10 @@ type Location = {
 
 type MapViewProps = {
 	mapBoxApiKey: string,
-  // navigationMode: NavigationMode,
-  // startingPoint: Location,
-  // endingPoint: Location,
+  navigationMode: NavigationMode,
+  startingPoint: Location,
+  endingPoint: Location,
+  color: string
 };
 
 const styles = StyleSheet.create({
@@ -32,83 +34,126 @@ const styles = StyleSheet.create({
 });
 
 class MapView extends Component<MapViewProps> {
-	static defaultProps = {
-		mapBoxApiKey: 'pk.eyJ1IjoicnhtYXQiLCJhIjoiY2poNmE1eXlwMDBwdTJ3cGc4N2ZuNDZxZiJ9.1ub1EU5Zq4LY5mz0_hywyA',
-	};
+
+  constructor(props) {
+    super(props);
+    this.state = {
+
+    };
+  }
 
   componentDidMount() {
     MapboxGL.setAccessToken(this.props.mapBoxApiKey);
+    this.mapboxClient = new MapboxClient(this.props.mapBoxApiKey);
+    this.downloadRoute();
   }
 
-  // renderRoute(): React$Element<*> {
-  //   const { navigationMode } = this.props;
-  //   const { detailedRoute, globalRoute } = this.state;
+  renderDestination(): React$Element<*> {
+    const { endingPoint } = this.props;
 
-  //   const route = navigationMode === 'Course' ? detailedRoute : globalRoute;
+    return(
+      <Destination
+        lat={parseFloat(company.geoloc.lat)}
+        lng={parseFloat(company.geoloc.lng)}
+      />
+    );
+  }
 
-  //   return <Route route={route} />;
-  // }
+  downloadRoute = async () => {
+    const { startingPoint, endingPoint } = this.props;
 
-  // renderDestination(): React$Element<*> {
-  //   const { company, loading } = this.props;
+    try {
+      const res = await this.mapboxClient.getDirections(
+        [
+          {
+            latitude: startingPoint.latitude,
+            longitude: startingPoint.longitude,
+          },
+          {
+            latitude: endingPoint.latitude,
+            longitude: endingPoint.longitude,
+          },
+        ],
+        { profile: "driving", geometry: "polyline6", steps: true },
+      );
+      const routeData = res.entity.routes[0];
 
-  //   return(
-  //     <Destination
-  //       lat={parseFloat(company.geoloc.lat)}
-  //       lng={parseFloat(company.geoloc.lng)}
-  //     />
-  //   );
-  // }
+      const steps = routeData.legs[0].steps.map( step => step.geometry.coordinates);
+
+      this.setState({
+        globalRoute: lineString(routeData.geometry.coordinates),
+        detailedRoute: multiLineString(steps),
+        duration: routeData.duration,
+        distance: routeData.distance,
+        loadingOver: true,
+      });
+      return Promise.resolve(true);
+
+    } catch (err) {
+      console.warn({err});
+    }
+  };
 
   setMapRef = (ref) => { this.mapRef = ref; };
   
-  // moveCamera = (mapRef) => () => {
-  //   const { company, store } = this.props;
-  //   const { heading, lat, lng } = store;
+  moveCamera = (coords) => () => {
+    const { navigationMode, startingPoint, endingPoint } = this.props;
 
-  //   const latCompany = parseFloat(company.geoloc.lat);
-  //   const lngCompany = parseFloat(company.geoloc.lng);
+    if (navigationMode === 'Course') {
+      mapRef.setCamera({
+        stops: [
+          { centerCoordinate: [coords.longitude, coords.latitude], duration: 100 },
+          { zoom: 17, duration: 100 },
+          { pitch: 45, duration: 100 },
+          { heading: coords.heading, duration: 100 },
+        ],
+      });
+    }
+    else {
+      mapRef.fitBounds(
+        [Math.max(startingPoint.longitude, endingPoint.longitude), Math.max(startingPoint.latitude, endingPoint.latitude)],
+        [Math.min(startingPoint.longitude, endingPoint.longitude), Math.min(startingPoint.latitude, endingPoint.latitude)],
+        40,
+        300,
+      );
+    }
+  };
 
-  //   const isNavigating = this.props.store.currentNavigation === this.key;
-  //   if (isNavigating) {
-  //     mapRef.setCamera({
-  //       stops: [
-  //         // { centerCoordinate: [lng, lat], duration: 100 },
-  //         { zoom: 17, duration: 100 },
-  //         { pitch: 45, duration: 100 },
-  //         { heading, duration: 100 },
-  //       ],
-  //     });
-  //   }
-  //   else {
-  //     mapRef.fitBounds(
-  //       [Math.max(lng, lngCompany), Math.max(lat, latCompany)],
-  //       [Math.min(lng, lngCompany), Math.min(lat, latCompany)],
-  //       40,
-  //       300,
-  //     );
-  //   }
-  // };
+  onUserLocationUpdate = (currLoc) => {
+    console.log({currLoc});
+    
+    this.moveCamera(currLoc.coords);
+  };
 
   render(): React$Element<*> {
-    const { navigationMode } = this.props;
+    const { navigationMode, endingPoint, color } = this.props;
+    const { detailedRoute, globalRoute, loadingOver } = this.state;
 
     const mode = navigationMode === 'Course' ?
       MapboxGL.UserTrackingModes.FollowWithCourse :
       MapboxGL.UserTrackingModes.Follow;
 
+    const route = navigationMode === 'Course' ?
+      detailedRoute :
+      globalRoute;
+
     return (
-      <View style={{flex: 1, backgroundColor: 'pink'}}>
-        {/* <MapboxGL.MapView
+      <View style={styles.container}>
+        <MapboxGL.MapView
           styleURL={MapboxGL.StyleURL.Street}
           ref={this.setMapRef}
           logoEnabled={false}
           userTrackingMode={mode}
           style={styles.container}
+          onUserLocationUpdate={this.onUserLocationUpdate}
           showUserLocation
         >
-
-        </MapboxGL.MapView> */}
+          {
+            loadingOver &&
+            <Route route={route} lineColor={color} />
+          }
+          <Destination coords={endingPoint}/>
+        </MapboxGL.MapView>
       </View>
     );
   }
