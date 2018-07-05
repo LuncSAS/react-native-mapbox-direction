@@ -1,6 +1,5 @@
 // @flow
 import React, { Component } from "react";
-import autobind from "autobind-decorator";
 import {StyleSheet, View} from "react-native";
 
 import MapboxGL from "@mapbox/react-native-mapbox-gl";
@@ -8,9 +7,9 @@ import { multiLineString, lineString } from "@turf/helpers";
 import distance from "@turf/distance";
 const turfPoint = require("turf-point");
 
-import Destination from "./Destination";
-import Route from "./Route";
-import CirclePicture from "./CirclePicture";
+// import Destination from "./Destination";
+// import Route from "./Route";
+// import CirclePicture from "./CirclePicture";
 
 type NavigationMode = 'Course' | 'Global';
 

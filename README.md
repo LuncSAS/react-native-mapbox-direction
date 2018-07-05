@@ -9,7 +9,7 @@
 
 `$ yarn add react-native-mapbox-direction`
 
-## You need to install [react-native-mapbox-gl](https://github.com/mapbox/react-native-mapbox-gl) first!
+## You need to install [react-native-mapbox-gl](https://github.com/mapbox/react-native-mapbox-gl) in your project first!
 
 ## Usage
 ```javascript

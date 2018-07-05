@@ -13,14 +13,29 @@
   "author": "David GUERIN",
   "license": "MIT",
   "peerDependencies": {
-    "react-native": "^0.41.2",
     "react": "^16.3.1",
-    "@mapbox/react-native-mapbox-gl": "^6.1.2-beta2",
+    "react-native": "^0.55.4",
+    "@mapbox/react-native-mapbox-gl": "^6.1.2-beta2"
+  },
+  "dependencies": {
+    "mapbox": "^1.0.0-beta10",
     "@turf/distance": "^6.0.1",
     "turf-point": "^2.0.1",
     "@turf/helpers": "^6.1.4"
   },
-  "dependencies": { 
-    "mapbox": "^1.0.0-beta10"
+  "devDependencies": {
+    "@types/react": "^16.0.38",
+    "@types/react-native": "^0.52.12",
+    "babel-preset-react-native": "4.0.0",
+    "eslint": "^4.9.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-config-cooperka": "0.2.9",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.7.0",
+    "eslint-plugin-react-native": "3.2.1",
+    "jest": "^23.3.0",
+    "babel-jest": "^23.2.0",
+    "babel-core": "^6.0.0"
   }
 }
