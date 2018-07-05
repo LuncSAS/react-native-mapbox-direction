@@ -96,11 +96,11 @@ class MapView extends Component<MapViewProps> {
 
   setMapRef = (ref) => { this.mapRef = ref; };
   
-  moveCamera = (coords) => () => {
+  moveCamera = () => {
     const { navigationMode, startingPoint, endingPoint } = this.props;
 
     if (navigationMode === 'Course') {
-      mapRef.setCamera({
+      this.mapRef.setCamera({
         stops: [
           { centerCoordinate: [coords.longitude, coords.latitude], duration: 100 },
           { zoom: 17, duration: 100 },
@@ -110,18 +110,16 @@ class MapView extends Component<MapViewProps> {
       });
     }
     else {
-      mapRef.fitBounds(
+      this.mapRef.fitBounds(
         [Math.max(startingPoint.longitude, endingPoint.longitude), Math.max(startingPoint.latitude, endingPoint.latitude)],
         [Math.min(startingPoint.longitude, endingPoint.longitude), Math.min(startingPoint.latitude, endingPoint.latitude)],
-        40,
+        80,
         300,
       );
     }
   };
 
   onUserLocationUpdate = (currLoc) => {
-    console.log({currLoc});
-    
     this.moveCamera(currLoc.coords);
   };
 
