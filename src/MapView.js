@@ -45,7 +45,15 @@ class MapView extends Component<MapViewProps> {
   componentDidMount() {
     MapboxGL.setAccessToken(this.props.mapBoxApiKey);
     this.mapboxClient = new MapboxClient(this.props.mapBoxApiKey);
+
     this.downloadRoute();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (JSON.stringify(nextProps.startingPoint) !== JSON.stringify(this.props.startingPoint) ||
+        JSON.stringify(nextProps.endingPoint) !== JSON.stringify(this.props.endingPoint)) {
+      this.downloadRoute();
+    }
   }
 
   renderDestination(): React$Element<*> {
@@ -87,6 +95,7 @@ class MapView extends Component<MapViewProps> {
         distance: routeData.distance,
         loadingOver: true,
       });
+      this.props.onDirectionChange({duration: routeData.duration, distance: routeData.distance});
       return Promise.resolve(true);
 
     } catch (err) {
@@ -98,18 +107,19 @@ class MapView extends Component<MapViewProps> {
   
   moveCamera = () => {
     const { navigationMode, startingPoint, endingPoint } = this.props;
+    const { currentLocation } = this.state;
 
-    if (navigationMode === 'Course') {
+    if (navigationMode === 'Course' && currentLocation) {
       this.mapRef.setCamera({
         stops: [
-          { centerCoordinate: [coords.longitude, coords.latitude], duration: 100 },
+          { centerCoordinate: [currentLocation.longitude, currentLocation.latitude], duration: 100 },
           { zoom: 17, duration: 100 },
           { pitch: 45, duration: 100 },
-          { heading: coords.heading, duration: 100 },
+          { heading: currentLocation.heading, duration: 100 },
         ],
       });
     }
-    else {
+    else if (navigationMode === 'Global') {
       this.mapRef.fitBounds(
         [Math.max(startingPoint.longitude, endingPoint.longitude), Math.max(startingPoint.latitude, endingPoint.latitude)],
         [Math.min(startingPoint.longitude, endingPoint.longitude), Math.min(startingPoint.latitude, endingPoint.latitude)],
@@ -121,6 +131,7 @@ class MapView extends Component<MapViewProps> {
 
   onUserLocationUpdate = (currLoc) => {
     this.moveCamera(currLoc.coords);
+    this.setState({currentLocation: currLoc.coords});
   };
 
   render(): React$Element<*> {
@@ -143,6 +154,9 @@ class MapView extends Component<MapViewProps> {
           logoEnabled={false}
           userTrackingMode={mode}
           style={styles.container}
+          localizeLabels
+          attributionEnabled={false}
+          logoEnabled={false}
           onUserLocationUpdate={this.onUserLocationUpdate}
           showUserLocation
         >

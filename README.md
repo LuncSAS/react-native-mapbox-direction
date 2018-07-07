@@ -15,11 +15,12 @@
 
 | Name | Type | Required | Description |
 | :---         |     :---:      |     :---:      | :---         |
-| mapBoxApiKey   | string     | Yes    | Your Mapbox API key    |
-| ref            | function   | No     | MapView Reference      |
-| startingPoint  | object     | Yes    | An object containing departure's latitude and longitude    |
-| endingPoint    | object     | Yes    | An object containing destination's latitude and longitude    |
-| color          | string     | Yes    | Direction's color      |
+| mapBoxApiKey      | string     | Yes    | Your Mapbox API key                                       |
+| ref               | function   | No     | MapView Reference                                         |
+| startingPoint     | object     | Yes    | An object containing departure's latitude and longitude   |
+| endingPoint       | object     | Yes    | An object containing destination's latitude and longitude |
+| color             | string     | Yes    | Direction's color                                         |
+| onDirectionChange | function   | No     | Return an object with distance and duration               |
 
 ## Usage
 ```javascript
